@@ -3,8 +3,11 @@
  */
 package twitter;
 
+import java.time.Instant;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Extract consists of methods that extract information from a list of tweets.
@@ -24,7 +27,71 @@ public class Extract {
      *         every tweet in the list.
      */
     public static Timespan getTimespan(List<Tweet> tweets) {
-        throw new RuntimeException("not implemented");
+        if (tweets.size() == 0)
+        {
+            throw new IllegalArgumentException("Atleast one tweet must exist");
+        }
+        
+        Iterator<Tweet> iter = tweets.iterator();
+        Instant start = iter.next().getTimestamp();
+        Instant end = start;
+        
+        while (iter.hasNext())
+        {
+            Instant local = iter.next().getTimestamp();
+            
+            if (local.compareTo(start) < 0)
+            {
+                start = local;
+            }
+            
+            if (local.compareTo(end) > 0)
+            {
+                end = local;
+            }
+        }
+        
+        return new Timespan(start, end);
+    }
+    
+    /**
+     * 
+     * @param tweet single tweet, not modified by this method
+     * @return set of usernames present in the tweet
+     */
+    private static Set<String> getMentionedUsers(Tweet tweet)
+    {
+        Set<String> resultSet = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        String[] words = tweet.getText().toLowerCase().split("[^\\w@-]+");
+        
+        for (String word : words)
+        {
+            if (word.startsWith("@"))
+            {
+                String uname;
+                int length = word.length();
+                int startIndex;
+                
+                for (startIndex = 0; startIndex < length && word.charAt(startIndex) == '@'; startIndex++);
+                int endIndex = word.indexOf('@', startIndex);
+                
+                if (endIndex == -1)
+                {
+                    uname = word.substring(startIndex);
+                }
+                else
+                {
+                    uname = word.substring(startIndex, endIndex);
+                }
+                
+                if (!uname.isEmpty())
+                {
+                    resultSet.add(uname);
+                }
+            }
+        }
+        
+        return resultSet;
     }
 
     /**
@@ -43,7 +110,14 @@ public class Extract {
      *         include a username at most once.
      */
     public static Set<String> getMentionedUsers(List<Tweet> tweets) {
-        throw new RuntimeException("not implemented");
+        Set<String> resultSet = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        
+        for (Tweet tweet : tweets)
+        {
+            resultSet.addAll(getMentionedUsers(tweet));
+        }
+        
+        return resultSet;
     }
 
 }
