@@ -3,7 +3,10 @@
  */
 package twitter;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Filter consists of methods that filter a list of tweets for those matching a
@@ -27,7 +30,17 @@ public class Filter {
      *         in the same order as in the input list.
      */
     public static List<Tweet> writtenBy(List<Tweet> tweets, String username) {
-        throw new RuntimeException("not implemented");
+        List<Tweet> resultList = new ArrayList<>();
+        
+        for (Tweet tweet : tweets)
+        {
+            if (tweet.getAuthor().equalsIgnoreCase(username))
+            {
+                resultList.add(tweet);
+            }
+        }
+        
+        return resultList;
     }
 
     /**
@@ -41,7 +54,33 @@ public class Filter {
      *         in the same order as in the input list.
      */
     public static List<Tweet> inTimespan(List<Tweet> tweets, Timespan timespan) {
-        throw new RuntimeException("not implemented");
+        List<Tweet> resultList = new ArrayList<Tweet>();
+        
+        for (Tweet tweet : tweets)
+        {
+            if (tweet.getTimestamp().compareTo(timespan.getStart()) >= 0 
+                    && tweet.getTimestamp().compareTo(timespan.getEnd()) <= 0)
+            {
+                resultList.add(tweet);
+            }
+        }
+        
+        return resultList;
+    }
+    
+    private static boolean containing(String text, Set<String> lookupSet)
+    {
+        String[] words = text.split("\\s+");
+        
+        for (String word : words)
+        {
+            if (lookupSet.contains(word))
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**
@@ -60,7 +99,19 @@ public class Filter {
      *         same order as in the input list.
      */
     public static List<Tweet> containing(List<Tweet> tweets, List<String> words) {
-        throw new RuntimeException("not implemented");
+        Set<String> lookupSet = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        lookupSet.addAll(words);
+        List<Tweet> resultList = new ArrayList<>();
+        
+        for (Tweet tweet : tweets)
+        {
+            if (containing(tweet.getText(), lookupSet))
+            {
+                resultList.add(tweet);
+            }
+        }
+        
+        return resultList;
     }
 
 }
